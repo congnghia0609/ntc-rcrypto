@@ -1,4 +1,4 @@
-require './rcrypto'
+require 'rcrypto'
 
 sss = Rcrypto::SSS.new
 

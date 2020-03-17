@@ -22,7 +22,7 @@ gem install ntc-rcrypto
 ## Usage
 **Use encode/decode Hex**  
 ```ruby
-require './rcrypto'
+require 'rcrypto'
 
 sss = Rcrypto::SSS.new
 
