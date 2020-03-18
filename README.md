@@ -19,7 +19,8 @@ Or install it yourself as:
 gem install ntc-rcrypto
 ```
 
-## Usage
+## 1. An implementation of Shamir's Secret Sharing Algorithm 256-bits in Ruby
+### Usage
 **Use encode/decode Hex**  
 ```ruby
 require 'rcrypto'
