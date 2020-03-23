@@ -297,7 +297,7 @@ module Rcrypto
       while j < count
         part = candidate[j * 64...(j + 1) * 64]
         decode = from_hex(part)
-        if decode < 0 || decode == @@prime
+        if decode <= 0 || decode >= @@prime
           return false
         end
         j += 1
