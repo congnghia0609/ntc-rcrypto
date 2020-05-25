@@ -1,3 +1,5 @@
+# Run Terminal: /bin/bash -c "env RBENV_VERSION=2.7.0 ~/.rbenv/libexec/rbenv exec bundle exec ruby ./lib/main.rb"
+
 require 'rcrypto'
 
 sss = Rcrypto::SSS.new
@@ -18,11 +20,15 @@ sss = Rcrypto::SSS.new
 # number = 67356225285819719212258382314594931188352598651646313425411610888829358649431
 # puts number
 # b64data = sss.to_base64(number)
-# puts b64data.length  # 88
-# puts b64data  # OTRlYTQ1YzMyYzI5MDllNTQwNzBhZDNmMmNlMjg2Zjk4YjU2ZWY1YzcyOGY1NmQ3ZDNhMDljNWJiNTU5MzA1Nw==
+# puts b64data.length
+# puts b64data
+# # 88
+# # OTRlYTQ1YzMyYzI5MDllNTQwNzBhZDNmMmNlMjg2Zjk4YjU2ZWY1YzcyOGY1NmQ3ZDNhMDljNWJiNTU5MzA1Nw==
+# # 44
+# # lOpFwywpCeVAcK0_LOKG-YtW71xyj1bX06CcW7VZMFc=
 # hexdata = sss.to_hex(number)
-# puts hexdata.length  # 64
-# puts hexdata  # 94ea45c32c2909e54070ad3f2ce286f98b56ef5c728f56d7d3a09c5bb5593057
+# puts hexdata.length # 64
+# puts hexdata # 94ea45c32c2909e54070ad3f2ce286f98b56ef5c728f56d7d3a09c5bb5593057
 # numb64decode = sss.from_base64(b64data)
 # puts numb64decode
 # numhexdecode = sss.from_hex(hexdata)
@@ -39,27 +45,27 @@ sss = Rcrypto::SSS.new
 # puts rs
 # puts rs.length  # 109
 
-# Test1
-s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-puts s
-puts s.length
-# creates a set of shares
-arr = sss.create(3, 6, s)
-# puts "================== arr"
-# puts arr
-# puts "=================="
-# combines shares into secret
-s1 = sss.combine(arr[0...3])
-puts s1
-puts s1.length
-
-s2 = sss.combine(arr[3...6])
-puts s2
-puts s2.length
-
-s3 = sss.combine(arr[1...5])
-puts s3
-puts s3.length
+# # Test1
+# s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# puts s
+# puts s.length
+# # creates a set of shares
+# arr = sss.create(3, 6, s, false)
+# # puts "================== arr"
+# # puts arr
+# # puts "=================="
+# # combines shares into secret
+# s1 = sss.combine(arr[0...3], false)
+# puts s1
+# puts s1.length
+#
+# s2 = sss.combine(arr[3...6], false)
+# puts s2
+# puts s2.length
+#
+# s3 = sss.combine(arr[1...5], false)
+# puts s3
+# puts s3.length
 
 
 # # Test2
@@ -79,14 +85,67 @@ puts s3.length
 # # puts arr
 # # puts "=================="
 # # combines shares into secret
-# s1 = sss.combine(arr[0...3])
+# s1 = sss.combine(arr[0...3], false)
 # puts s1
 # puts s1.length
 #
-# s2 = sss.combine(arr[3...6])
+# s2 = sss.combine(arr[3...6], false)
 # puts s2
 # puts s2.length
 #
-# s3 = sss.combine(arr[1...5])
+# s3 = sss.combine(arr[1...5], false)
+# puts s3
+# puts s3.length
+
+
+# # Test3
+# s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# puts s
+# puts s.length
+# # creates a set of shares
+# arr = sss.create(3, 6, s, true)
+# # puts "================== arr"
+# # puts arr
+# # puts "=================="
+# # combines shares into secret
+# s1 = sss.combine(arr[0...3], true)
+# puts s1
+# puts s1.length
+#
+# s2 = sss.combine(arr[3...6], true)
+# puts s2
+# puts s2.length
+#
+# s3 = sss.combine(arr[1...5], true)
+# puts s3
+# puts s3.length
+
+
+# # Test4
+# s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# puts s
+# puts s.length
+# # creates a set of shares
+# arr = [
+#     "3yHo_uVUBRJJ8AiBL-3SS2OAFoe8A0lYF9PVsylFpfU=hFNCvpl0Vo9pESdgVuQs88bna5lMFgfVsixJEjT38EU=rnqFtyOaWu6ROU7LqegKRBG3hnr75Uwa3xTLRTD_Ahs=HeD7Nh0314-9m6YAaAiLKv5QiPToYd_PpSOveTPf-08=VLnVwLvMoEy19oHz7F1RuQjexvNdBB9Z_0VBFpz3-tw=FVJFrnO0LyhswtULPNUQr3j-rwPVrruAp-SrU-JDQcU=6dUlv2kHgZNYlV0ZiVhtQ_E-Vdt5Qu_74_ur8hLkTaM=oOyKYNhTd98bif9cEOVxPQCJjOh7haA63COMtGVLGDA=",
+#     "coKbKOpKsucIF0hLgL6r2dOJpQ52TXnqU4Y4Znc26aU=Byrn3KrQn8Rq8-F49THePjAxy1fkixnjf7H-Q82tlNY=C-17nZaq6PPDfHCDPIpmVa928rUYAXxkhop-1dhyEqg=kn_fIXrpRCh1WluMW2EQddz9Vlj7m4SlUWnSAupD6yQ=yrT7uX2bF0AEdOUFQx1sd-SAYBj4vY0wLQaXkilp9LQ=65RU1AOhohmmN5dmKChFipsCdCraLIu1I0tlfUCdtdQ=_oHtNTo71hjx5RO_BaDJq2hiZTvpQjN6-O4n6zf8F_M=bd5XjTzbwgZIoXDCeqX_lGbCAIW1kepA-j6xRChI5Co=",
+#     "O7As77L_0wcYIjvuL-Uod9WNAWWsB1W3iFjSVPDfgDE=bfOMBFU6n6dcMTmD7Vp67xwyUMQDLMVv3dkJfU0-GAE=N7rOnWAcjXG_SA0UZyfTi4Rv17ja5_8otHG4nbnYsUE=xhfjU2E_Zc3ldk5S5vUS3nUbHcWP_8Co0ROXF_542T8=3_XtNGxPNC_ZPRydvGdeGomiHRU1alWEFbfYPE4TFPg=hUA48-h2u6gJs4g5wDmvQzbTXQlAagBG3VjBQYGgjDI=AZHs5DhgW27YC5Tw0bW4wkbwpq7l13JNyEpR6m6PM0s=ZLA7GzYugrD-ii2h0f9kx0F8dS0TJQEJgcM1sg4KxHQ=",
+#     "1qi-z1_JzZq1pPaQlajigXK7ZLD49o9uEbAG0i2JPRE=F_-WklezDbbn5TwLzwgTH7y4CrdtgzHkRnoT7yGvlOc=L2ydfKaeEZAdO99MEW5z2_G73Cw17GKSjrFBrtlv91w=AVDKhDGyMJjcslpMKP796I6gMAs7Y3B5Oqqo0abpTSo=Jk2aKW6g1Ol88MXn2mZcRE7o_mjlK4L4rm7Mn-1xW4Y=PTxmdcCnxcI30aqkf1vmC96CmGovnH2G_RvtRaudmoE=vlw4fz5CHvoUteCz1KiQ4VvS_AmZqJUbMC1qIh4TTbU=uNF3vO6B7Q9nA29FFoDg5XnryRJAWPf0Fyn5-qNgorg=",
+#     "BvCmwKngaukEhX9PbO_mbs-kVXJZasFnCTbG1BU4uy8=D5R_MinicWA4MSUYlurfxKeMqHjXcsnB8fe6eGlWl2Q=4EqtWUErsPDEupb-lyrFBcrsDVmutZao3u7NMM0j-eE=atF3vl9wmfzGWsPtaYgmMA3K6VbEctYO0PvxLYEqhPs=yWvAcAYRiz7N08AxR7gS6FUkw5K9Fufb0TUvv6sn0Go=QnYDo7XCF0A_q4zdKLgrzSuwGxdACySdy_YyvbQXKFU=zoJeB5fBh-_JZXZh_e9_lI0VYZfj2sSmn0QU5rbDzjw=RJW7Ip7iy2E5bzLFmA0MRluWRBI_unyVeCIrxSFgnr0=",
+#     "H7L3h0FeMRJhlOjb4P7ujl8TU62V6BR-3hmrgeZSsqY=YIgcyaTE2i9cjWGy2KYwXG-Bihe5tVqwTDvfpGG0bjc=HaQPRVj61WadfsKTNQ_nz8Ysmuw8kbTTdtTUq4pr8ow=mral1sUzGfHO7wqBG5OjpieS8OQVcfWUGMefSmoePwM=hTgwBQUnnz5NpUjq-f5ZmFLeraoWqAUXu3FvpN2InoY=_O78YvsYo8BdIVwlixp889NAACSo1fnHjXwZ06X8LIQ=D_gDXhWQ4efiIxJPn-80PiCE1qRt89bh_IK0ZOZt9Ew=tYgTQLKfnvNrlq8fMyPnKWJ165zEuvu3lOpWnw8_Qiw="
+# ]
+# # puts "================== arr"
+# # puts arr
+# # puts "=================="
+# # combines shares into secret
+# s1 = sss.combine(arr[0...3], true)
+# puts s1
+# puts s1.length
+#
+# s2 = sss.combine(arr[3...6], true)
+# puts s2
+# puts s2.length
+#
+# s3 = sss.combine(arr[1...5], true)
 # puts s3
 # puts s3.length

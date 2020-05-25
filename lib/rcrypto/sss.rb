@@ -48,6 +48,32 @@ module Rcrypto
       s.split.pack('H*')
     end
 
+    # Return Uint8Array binary representation of hex string.
+    def hex_to_u8b(hex)
+      u8 = []
+      hex = '0' + hex if hex.length.odd?
+      len = hex.length / 2
+      i = 0
+      j = 0
+      while i < len
+        u8.append((hex[j...j + 2]).to_i(16))
+        j += 2
+        i += 1
+      end
+      # uint8_t
+      u8b = u8.pack('C*')
+      u8b
+    end
+
+    # Return hex string representation of Uint8Array binary.
+    def u8b_to_hex(u8b)
+      u8 = u8b.unpack('C*')
+      hex = u8.map do |v|
+        v.to_s(16).rjust(2, '0')
+      end.join
+      hex
+    end
+
     # Returns the Int number base10 in base64 representation; note: this is
     # not a string representation; the base64 output is exactly 256 bits long.
     def to_base64(number)
@@ -58,7 +84,8 @@ module Rcrypto
         hexdata = '0' + hexdata
         i += 1
       end
-      b64data = Base64.urlsafe_encode64(hexdata)
+      u8b = hex_to_u8b(hexdata)
+      b64data = Base64.urlsafe_encode64(u8b)
       b64data
     end
 
@@ -66,7 +93,8 @@ module Rcrypto
     # not coming from a string representation; the base64 input is exactly 256
     # bits long, and the output is an arbitrary size base 10 integer.
     def from_base64(number)
-      hexdata = Base64.urlsafe_decode64(number)
+      u8b = Base64.urlsafe_decode64(number)
+      hexdata = u8b_to_hex(u8b)
       rs = hexdata.to_i(16)
       rs
     end
@@ -147,7 +175,7 @@ module Rcrypto
     # Converts an array of Ints to the original byte array, removing any
     # least significant nulls.
     def merge_int_to_string(secrets)
-      hex_data = ""
+      hex_data = ''
       for s in secrets
         tmp = to_hex(s)
         hex_data += tmp
@@ -159,17 +187,129 @@ module Rcrypto
     # in_numbers(numbers, value) returns boolean whether or not value is in array
     def in_numbers(numbers, value)
       for n in numbers
-        if n == value
-          return true
-        end
+        return true if n == value
       end
-      return false
+      false
+    end
+
+    # Takes a string array of shares encoded in Base64Url created via Shamir's
+    # Algorithm; each string must be of equal length of a multiple of 88 characters
+    # as a single 88 character share is a pair of 256-bit numbers (x, y).
+    def decode_share_base64(shares)
+      # Recreate the original object of x, y points, based upon number of shares
+      # and size of each share (number of parts in the secret).
+      secrets = []
+
+      # For each share...
+      for i in 0...shares.length
+        # ensure that it is valid.
+        unless is_valid_share_base64(shares[i])
+          raise Exception('one of the shares is invalid')
+        end
+
+        # find the number of parts it represents.
+        share = shares[i]
+        count = share.length / 88
+        arrsh = []
+        # and for each part, find the x,y pair...
+        for j in 0...count
+          cshare = share[j * 88...(j + 1) * 88]
+          arrxy = []
+          # decoding from Base64.
+          x = from_base64(cshare[0...44])
+          y = from_base64(cshare[44...88])
+          arrxy.push(x)
+          arrxy.push(y)
+          arrsh.push(arrxy)
+        end
+        secrets.push(arrsh)
+      end
+      secrets
+    end
+
+    # Takes in a given string to check if it is a valid secret
+    #
+    # Requirements:
+    #  	Length multiple of 88
+    # 	Can decode each 44 character block as Bas64Url
+    #
+    # Returns only success/failure (bool)
+    def is_valid_share_base64(candidate)
+      return false if candidate.length == 0 || candidate.length % 88 != 0
+
+      count = candidate.length / 44
+      j = 0
+      while j < count
+        part = candidate[j * 44...(j + 1) * 44]
+        decode = from_base64(part)
+        return false if decode <= 0 || decode >= @@prime
+
+        j += 1
+      end
+      true
+    end
+
+    # Takes a string array of shares encoded in Hex created via Shamir's
+    # Algorithm; each string must be of equal length of a multiple of 128 characters
+    # as a single 128 character share is a pair of 256-bit numbers (x, y).
+    def decode_share_hex(shares)
+      # Recreate the original object of x, y points, based upon number of shares
+      # and size of each share (number of parts in the secret).
+      secrets = []
+
+      # For each share...
+      for i in 0...shares.length
+        # ensure that it is valid.
+        unless is_valid_share_hex(shares[i])
+          raise Exception('one of the shares is invalid')
+        end
+
+        # find the number of parts it represents.
+        share = shares[i]
+        count = share.length / 128
+        arrsh = []
+        # and for each part, find the x,y pair...
+        for j in 0...count
+          cshare = share[j * 128...(j + 1) * 128]
+          arrxy = []
+          # decoding from Hex.
+          x = from_hex(cshare[0...64])
+          y = from_hex(cshare[64...128])
+          arrxy.push(x)
+          arrxy.push(y)
+          arrsh.push(arrxy)
+        end
+        secrets.push(arrsh)
+      end
+      secrets
+    end
+
+    # Takes in a given string to check if it is a valid secret
+    #
+    # Requirements:
+    #  	Length multiple of 128
+    # 	Can decode each 64 character block as Hex
+    #
+    # Returns only success/failure (bool)
+    def is_valid_share_hex(candidate)
+      return false if candidate.length == 0 || candidate.length % 128 != 0
+
+      count = candidate.length / 64
+      j = 0
+      while j < count
+        part = candidate[j * 64...(j + 1) * 64]
+        decode = from_hex(part)
+        return false if decode <= 0 || decode >= @@prime
+
+        j += 1
+      end
+      return true
     end
 
     # Returns a new array of secret shares (encoding x,y pairs as Base64 or Hex strings)
     # created by Shamir's Secret Sharing Algorithm requiring a minimum number of
     # share to recreate, of length shares, from the input secret raw as a string.
-    def create(minimum, shares, secret)
+    def create(minimum, shares, secret, is_base64 = false)
       result = []
 
       # Verify minimum isn't greater than shares; there is no way to recreate
@@ -236,8 +376,13 @@ module Rcrypto
           y = evaluate_polynomial(polynomial, j, number)
           arrxy.push(x)
           arrxy.push(y)
-          s += to_hex(x)
-          s += to_hex(y)
+          if is_base64
+            s += to_base64(x)
+            s += to_base64(y)
+          else
+            s += to_hex(x)
+            s += to_hex(y)
+          end
           arrsh.push(arrxy)
         end
         points.push(arrsh)
@@ -246,79 +391,22 @@ module Rcrypto
       result
     end
 
-    # akes a string array of shares encoded in Hex created via Shamir's
-    # Algorithm; each string must be of equal length of a multiple of 128 characters
-    # as a single 128 character share is a pair of 256-bit numbers (x, y).
-    def decode_share_hex(shares)
-      # Recreate the original object of x, y points, based upon number of shares
-      # and size of each share (number of parts in the secret).
-      secrets = []
-
-      # For each share...
-      for i in 0...shares.length
-        # ensure that it is valid.
-        unless is_valid_share_hex(shares[i])
-          raise Exception('one of the shares is invalid')
-        end
-
-        # find the number of parts it represents.
-        share = shares[i]
-        count = share.length / 128
-        arrsh = []
-        # and for each part, find the x,y pair...
-        for j in 0...count
-          cshare = share[j * 128...(j + 1) * 128]
-          arrxy = []
-          # decoding from Base64.
-          x = from_hex(cshare[0...64])
-          y = from_hex(cshare[64...128])
-          arrxy.push(x)
-          arrxy.push(y)
-          arrsh.push(arrxy)
-        end
-        secrets.push(arrsh)
-      end
-      secrets
-    end
-
-    # Takes in a given string to check if it is a valid secret
-    #
-    # Requirements:
-    #  	Length multiple of 128
-    # 	Can decode each 64 character block as Hex
-    #
-    # Returns only success/failure (bool)
-    def is_valid_share_hex(candidate)
-      if candidate.length == 0 || candidate.length % 128 != 0
-        return false
-      end
-      count = candidate.length / 64
-      j = 0
-      while j < count
-        part = candidate[j * 64...(j + 1) * 64]
-        decode = from_hex(part)
-        if decode <= 0 || decode >= @@prime
-          return false
-        end
-        j += 1
-      end
-      return true
-    end
-
     # Takes a string array of shares encoded in Base64 or Hex created via Shamir's Algorithm
     #     Note: the polynomial will converge if the specified minimum number of shares
     #           or more are passed to this function. Passing thus does not affect it
     #           Passing fewer however, simply means that the returned secret is wrong.
-    def combine(shares)
-      if shares.empty?
-        raise Exception('shares is NULL or empty')
-      end
+    def combine(shares, is_base64 = false)
+      raise Exception('shares is NULL or empty') if shares.empty?
 
       # Recreate the original object of x, y points, based upon number of shares
       # and size of each share (number of parts in the secret).
       #
       # points[shares][parts][2]
-      points = decode_share_hex(shares)
+      points = if is_base64
+                 decode_share_base64(shares)
+               else
+                 decode_share_hex(shares)
+               end
       # puts points
 
       # Use Lagrange Polynomial Interpolation (LPI) to reconstruct the secrets.
