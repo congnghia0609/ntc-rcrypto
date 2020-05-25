@@ -163,6 +163,7 @@ module Rcrypto
       result
     end
 
+    # Remove right character '0'
     def trim_right(s)
       i = s.length - 1
       while i >= 0 && s[i] == '0'
@@ -315,10 +316,13 @@ module Rcrypto
       # Verify minimum isn't greater than shares; there is no way to recreate
       # the original polynomial in our current setup, therefore it doesn't make
       # sense to generate fewer shares than are needed to reconstruct the secrets.
+      if minimum <= 0 || shares <= 0
+        raise Exception('minimum or shares is invalid')
+      end
       if minimum > shares
         raise Exception('cannot require more shares then existing')
       end
-      raise Exception('secret is not empty') if secret.empty?
+      raise Exception('secret is NULL or empty') if secret.empty?
 
       # Convert the secrets to its respective 256-bit Int representation.
       secrets = split_secret_to_int(secret)
