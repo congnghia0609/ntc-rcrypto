@@ -318,6 +318,7 @@ module Rcrypto
       if minimum > shares
         raise Exception('cannot require more shares then existing')
       end
+      raise Exception('secret is not empty') if secret.empty?
 
       # Convert the secrets to its respective 256-bit Int representation.
       secrets = split_secret_to_int(secret)
@@ -359,14 +360,9 @@ module Rcrypto
       #
       # Note: this array is technically unnecessary due to creating result
       # in the inner loop. Can disappear later if desired.
-      #
-      # points[shares][parts][2]
-      points = []
       for i in 0...shares
         s = ''
-        arrsh = []
         for j in 0...secrets.length
-          arrxy = []
           # generate a new x-coordinate.
           number = random_number()
           while in_numbers(numbers, number)
@@ -374,8 +370,6 @@ module Rcrypto
           end
           x = number
           y = evaluate_polynomial(polynomial, j, number)
-          arrxy.push(x)
-          arrxy.push(y)
           if is_base64
             s += to_base64(x)
             s += to_base64(y)
@@ -383,9 +377,7 @@ module Rcrypto
             s += to_hex(x)
             s += to_hex(y)
           end
-          arrsh.push(arrxy)
         end
-        points.push(arrsh)
         result.push(s)
       end
       result
