@@ -345,13 +345,13 @@ module Rcrypto
         j = 1
         while j < minimum
           # Each coefficient should be unique
-          number = random_number()
-          while in_numbers(numbers, number)
-            number = random_number()
+          x = random_number()
+          while in_numbers(numbers, x)
+            x = random_number()
           end
 
-          numbers.append(number)
-          subpoly.push(number)
+          numbers.append(x)
+          subpoly.push(x)
           j += 1
         end
         polynomial.push(subpoly)
@@ -368,12 +368,11 @@ module Rcrypto
         s = ''
         for j in 0...secrets.length
           # generate a new x-coordinate.
-          number = random_number()
-          while in_numbers(numbers, number)
-            number = random_number()
+          x = random_number()
+          while in_numbers(numbers, x)
+            x = random_number()
           end
-          x = number
-          y = evaluate_polynomial(polynomial, j, number)
+          y = evaluate_polynomial(polynomial, j, x)
           if is_base64
             s += to_base64(x)
             s += to_base64(y)
