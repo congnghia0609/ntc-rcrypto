@@ -1,5 +1,5 @@
 # ntc-rcrypto
-ntc-rcrypto is module ruby cryptography.
+ntc-rcrypto is a module ruby cryptography.
 
 ## Installation
 
