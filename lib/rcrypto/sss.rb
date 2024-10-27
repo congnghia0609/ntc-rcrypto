@@ -34,18 +34,13 @@ module Rcrypto
 
     # Convert string to hex.
     def hexlify(s)
-      a = []
-      if s.respond_to? :each_byte
-        s.each_byte { |b| a << sprintf('%02X', b) }
-      else
-        s.each { |b| a << sprintf('%02X', b) }
-      end
+      a = s.encode("UTF-8").bytes.map { |b| b.to_s(16) }
       a.join.downcase
     end
 
     # Convert hex to string.
     def unhexlify(s)
-      s.split.pack('H*')
+      s.split.pack('H*').force_encoding("UTF-8")
     end
 
     # Return Uint8Array binary representation of hex string.
@@ -77,16 +72,16 @@ module Rcrypto
     # Returns the Int number base10 in base64 representation; note: this is
     # not a string representation; the base64 output is exactly 256 bits long.
     def to_base64(number)
-      hexdata = number.to_s(16)
-      n = 64 - hexdata.length
+      hex_data = number.to_s(16)
+      n = 64 - hex_data.length
       i = 0
       while i < n
-        hexdata = '0' + hexdata
+        hex_data = '0' + hex_data
         i += 1
       end
-      u8b = hex_to_u8b(hexdata)
-      b64data = Base64.urlsafe_encode64(u8b)
-      b64data
+      u8b = hex_to_u8b(hex_data)
+      b64_data = Base64.urlsafe_encode64(u8b)
+      b64_data
     end
 
     # Returns the number base64 in base 10 Int representation; note: this is
@@ -94,23 +89,23 @@ module Rcrypto
     # bits long, and the output is an arbitrary size base 10 integer.
     def from_base64(number)
       u8b = Base64.urlsafe_decode64(number)
-      hexdata = u8b_to_hex(u8b)
-      rs = hexdata.to_i(16)
+      hex_data = u8b_to_hex(u8b)
+      rs = hex_data.to_i(16)
       rs
     end
 
     # Returns the Int number base10 in Hex representation; note: this is
     # not a string representation; the Hex output is exactly 256 bits long.
     def to_hex(number)
-      hexdata = number.to_s(16)
-      # puts hexdata
-      n = 64 - hexdata.length
+      hex_data = number.to_s(16)
+      # puts hex_data
+      n = 64 - hex_data.length
       i = 0
       while i < n
-        hexdata = '0' + hexdata
+        hex_data = '0' + hex_data
         i += 1
       end
-      hexdata
+      hex_data
     end
 
     # Returns the number Hex in base 10 Int representation; note: this is
@@ -163,14 +158,23 @@ module Rcrypto
       result
     end
 
-    # Remove right character '0'
-    def trim_right(s)
+    # Remove right doubled characters '0' (zero byte in hex)
+    def trim_right_doubled_zero(s)
+      last = s.length
       i = s.length - 1
-      while i >= 0 && s[i] == '0'
-        i -= 1
+      while i > 2
+        if s[i] == '0' && s[i - 1] == '0'
+          last = i - 1
+        else
+          break
+        end
+        i -= 2
       end
-      rs = s[0..i]
-      rs
+      if last == s.length
+        s
+      else
+        s[0..(last-1)]
+      end
     end
 
     # Converts an array of Ints to the original byte array, removing any
@@ -181,7 +185,7 @@ module Rcrypto
         tmp = to_hex(s)
         hex_data += tmp
       end
-      hex_data = unhexlify(trim_right(hex_data))
+      hex_data = unhexlify(trim_right_doubled_zero(hex_data))
       hex_data
     end
 
@@ -211,19 +215,19 @@ module Rcrypto
         # find the number of parts it represents.
         share = shares[i]
         count = share.length / 88
-        arrsh = []
+        arr_sh = []
         # and for each part, find the x,y pair...
         for j in 0...count
-          cshare = share[j * 88...(j + 1) * 88]
-          arrxy = []
+          pair = share[j * 88...(j + 1) * 88]
+          arr_xy = []
           # decoding from Base64.
-          x = from_base64(cshare[0...44])
-          y = from_base64(cshare[44...88])
-          arrxy.push(x)
-          arrxy.push(y)
-          arrsh.push(arrxy)
+          x = from_base64(pair[0...44])
+          y = from_base64(pair[44...88])
+          arr_xy.push(x)
+          arr_xy.push(y)
+          arr_sh.push(arr_xy)
         end
-        secrets.push(arrsh)
+        secrets.push(arr_sh)
       end
       secrets
     end
@@ -268,19 +272,19 @@ module Rcrypto
         # find the number of parts it represents.
         share = shares[i]
         count = share.length / 128
-        arrsh = []
+        arr_sh = []
         # and for each part, find the x,y pair...
         for j in 0...count
-          cshare = share[j * 128...(j + 1) * 128]
-          arrxy = []
+          pair = share[j * 128...(j + 1) * 128]
+          arr_xy = []
           # decoding from Hex.
-          x = from_hex(cshare[0...64])
-          y = from_hex(cshare[64...128])
-          arrxy.push(x)
-          arrxy.push(y)
-          arrsh.push(arrxy)
+          x = from_hex(pair[0...64])
+          y = from_hex(pair[64...128])
+          arr_xy.push(x)
+          arr_xy.push(y)
+          arr_sh.push(arr_xy)
         end
-        secrets.push(arrsh)
+        secrets.push(arr_sh)
       end
       secrets
     end
@@ -340,8 +344,8 @@ module Rcrypto
       # polynomial[parts][minimum]
       polynomial = []
       for i in 0...secrets.length
-        subpoly = []
-        subpoly.push(secrets[i])
+        sub_poly = []
+        sub_poly.push(secrets[i])
         j = 1
         while j < minimum
           # Each coefficient should be unique
@@ -351,10 +355,10 @@ module Rcrypto
           end
 
           numbers.append(x)
-          subpoly.push(x)
+          sub_poly.push(x)
           j += 1
         end
-        polynomial.push(subpoly)
+        polynomial.push(sub_poly)
       end
 
       # Create the points object; this holds the (x, y) points of each share.
@@ -422,11 +426,8 @@ module Rcrypto
               # combine them via half products.
               # x=0 ==> [(0-bx)/(ax-bx)] * ...
               bx = points[k][j][0]  # bx
-              negbx = -bx  # (0 - bx)
-              axbx = ax - bx  # (ax - bx)
-
-              numerator = (numerator * negbx) % @@prime  # (0 - bx) * ...
-              denominator = (denominator * axbx) % @@prime  # (ax - bx) * ...
+              numerator = (numerator * -bx) % @@prime  # (0 - bx) * ...
+              denominator = (denominator * (ax - bx)) % @@prime  # (ax - bx) * ...
             end
           end
           # LPI product: x=0, y = ay * [(x-bx)/(ax-bx)] * ...

@@ -1,4 +1,6 @@
+# Install lib: bundle install
 # Run Terminal: /bin/bash -c "env RBENV_VERSION=2.7.0 ~/.rbenv/libexec/rbenv exec bundle exec ruby ./lib/main.rb"
+# /bin/bash -c "env RBENV_VERSION=3.3.5 ~/.rbenv/libexec/rbenv exec bundle exec ruby ./lib/main.rb"
 
 require 'rcrypto'
 
@@ -45,27 +47,28 @@ sss = Rcrypto::SSS.new
 # puts rs
 # puts rs.length  # 109
 
-# # Test1
-# s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-# puts s
-# puts s.length
-# # creates a set of shares
-# arr = sss.create(3, 6, s, false)
-# # puts "================== arr"
-# # puts arr
-# # puts "=================="
-# # combines shares into secret
-# s1 = sss.combine(arr[0...3], false)
-# puts s1
-# puts s1.length
-#
-# s2 = sss.combine(arr[3...6], false)
-# puts s2
-# puts s2.length
-#
-# s3 = sss.combine(arr[1...5], false)
-# puts s3
-# puts s3.length
+# Test1
+s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+puts s
+puts s.length
+# creates a set of shares
+arr = sss.create(3, 6, s, false)
+# puts "================== arr"
+# puts arr
+# puts "=================="
+# combines shares into secret
+s1 = sss.combine(arr[0...3], false)
+puts s1
+puts s1.length
+
+s2 = sss.combine(arr[3...6], false)
+puts s2
+puts s2.length
+
+s3 = sss.combine(arr[1...5], false)
+puts s3
+puts s3.length
+puts s3 == s
 
 
 # # Test2
@@ -98,27 +101,28 @@ sss = Rcrypto::SSS.new
 # puts s3.length
 
 
-# # Test3
-# s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-# puts s
-# puts s.length
-# # creates a set of shares
-# arr = sss.create(3, 6, s, true)
-# # puts "================== arr"
-# # puts arr
-# # puts "=================="
-# # combines shares into secret
-# s1 = sss.combine(arr[0...3], true)
-# puts s1
-# puts s1.length
-#
-# s2 = sss.combine(arr[3...6], true)
-# puts s2
-# puts s2.length
-#
-# s3 = sss.combine(arr[1...5], true)
-# puts s3
-# puts s3.length
+# Test3
+s = "nghiatcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+puts s
+puts s.length
+# creates a set of shares
+arr = sss.create(3, 6, s, true)
+# puts "================== arr"
+# puts arr
+# puts "=================="
+# combines shares into secret
+s1 = sss.combine(arr[0...3], true)
+puts s1
+puts s1.length
+
+s2 = sss.combine(arr[3...6], true)
+puts s2
+puts s2.length
+
+s3 = sss.combine(arr[1...5], true)
+puts s3
+puts s3.length
+puts s3 == s
 
 
 # # Test4
@@ -149,3 +153,49 @@ sss = Rcrypto::SSS.new
 # s3 = sss.combine(arr[1...5], true)
 # puts s3
 # puts s3.length
+
+# Test5 Test full Hex with special cases not Latin symbols
+s = "бар"  # Cyrillic
+puts s
+puts s.length
+# creates a set of shares
+arr = sss.create(3, 6, s, false)
+# puts "================== arr"
+# puts arr
+# puts "=================="
+# combines shares into secret
+s1 = sss.combine(arr[0...3], false)
+puts s1
+puts s1.length
+
+s2 = sss.combine(arr[3...6], false)
+puts s2
+puts s2.length
+
+s3 = sss.combine(arr[1...5], false)
+puts s3
+puts s3.length
+puts s3 == s
+
+# Test6 Test full Base64Url with special cases not Latin symbols
+s = "бар"  # Cyrillic
+puts s
+puts s.length
+# creates a set of shares
+arr = sss.create(3, 6, s, true)
+# puts "================== arr"
+# puts arr
+# puts "=================="
+# combines shares into secret
+s1 = sss.combine(arr[0...3], true)
+puts s1
+puts s1.length
+
+s2 = sss.combine(arr[3...6], true)
+puts s2
+puts s2.length
+
+s3 = sss.combine(arr[1...5], true)
+puts s3
+puts s3.length
+puts s3 == s

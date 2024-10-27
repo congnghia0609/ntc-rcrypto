@@ -1,3 +1,5 @@
+# /bin/bash -c "env RBENV_VERSION=3.3.5 ~/.rbenv/libexec/rbenv exec bundle exec ruby ./test/rcrypto/rcrypto_test.rb"
+
 require "test_helper"
 require 'rcrypto'
 
@@ -116,6 +118,46 @@ class Rcrypto::RcryptoTest < Minitest::Test
       "BvCmwKngaukEhX9PbO_mbs-kVXJZasFnCTbG1BU4uy8=D5R_MinicWA4MSUYlurfxKeMqHjXcsnB8fe6eGlWl2Q=4EqtWUErsPDEupb-lyrFBcrsDVmutZao3u7NMM0j-eE=atF3vl9wmfzGWsPtaYgmMA3K6VbEctYO0PvxLYEqhPs=yWvAcAYRiz7N08AxR7gS6FUkw5K9Fufb0TUvv6sn0Go=QnYDo7XCF0A_q4zdKLgrzSuwGxdACySdy_YyvbQXKFU=zoJeB5fBh-_JZXZh_e9_lI0VYZfj2sSmn0QU5rbDzjw=RJW7Ip7iy2E5bzLFmA0MRluWRBI_unyVeCIrxSFgnr0=",
       "H7L3h0FeMRJhlOjb4P7ujl8TU62V6BR-3hmrgeZSsqY=YIgcyaTE2i9cjWGy2KYwXG-Bihe5tVqwTDvfpGG0bjc=HaQPRVj61WadfsKTNQ_nz8Ysmuw8kbTTdtTUq4pr8ow=mral1sUzGfHO7wqBG5OjpieS8OQVcfWUGMefSmoePwM=hTgwBQUnnz5NpUjq-f5ZmFLeraoWqAUXu3FvpN2InoY=_O78YvsYo8BdIVwlixp889NAACSo1fnHjXwZ06X8LIQ=D_gDXhWQ4efiIxJPn-80PiCE1qRt89bh_IK0ZOZt9Ew=tYgTQLKfnvNrlq8fMyPnKWJ165zEuvu3lOpWnw8_Qiw="
     ]
+    # combines shares into secret
+    s1 = sss.combine(arr[0...3], true)
+    assert s1 == s
+
+    s2 = sss.combine(arr[3...6], true)
+    assert s2 == s
+
+    s3 = sss.combine(arr[1...5], true)
+    assert s3 == s
+  end
+
+  def test_full_hex_with_special_cases
+    sss = Rcrypto::SSS.new
+
+    s = "бар"  # Cyrillic
+    # creates a set of shares
+    arr = sss.create(3, 6, s, false)
+
+    assert arr.length == 6
+
+    # combines shares into secret
+    s1 = sss.combine(arr[0...3], false)
+    assert s1 == s
+
+    s2 = sss.combine(arr[3...6], false)
+    assert s2 == s
+
+    s3 = sss.combine(arr[1...5], false)
+    assert s3 == s
+  end
+
+  def test_full_base64_with_special_cases
+    sss = Rcrypto::SSS.new
+
+    s = "бар"  # Cyrillic
+    # creates a set of shares
+    arr = sss.create(3, 6, s, true)
+
+    assert arr.length == 6
+
     # combines shares into secret
     s1 = sss.combine(arr[0...3], true)
     assert s1 == s
