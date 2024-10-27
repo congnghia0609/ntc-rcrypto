@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["congnghia0609@gmail.com"]
 
   spec.summary       = %q{ntc-rcrypto ruby cryptography.}
-  spec.description   = %q{ntc-rcrypto is module ruby cryptography.}
+  spec.description   = %q{ntc-rcrypto is a module ruby cryptography.}
   spec.homepage      = "https://github.com/congnghia0609/ntc-rcrypto"
   spec.license       = 'Apache-2.0'
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
