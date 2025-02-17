@@ -376,6 +376,7 @@ module Rcrypto
           while in_numbers(numbers, x)
             x = random_number()
           end
+          numbers.append(x)
           y = evaluate_polynomial(polynomial, j, x)
           if is_base64
             s += to_base64(x)
